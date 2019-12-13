@@ -56,42 +56,45 @@ INSTALL-PREP () {
     n|N )   echo "That´s ok I´ll install the latest stable version ;-)"
             NIGHTLY=0
             ;;
-      * )   echo "invalid"
-            echo "ABORTING"
+      * )   echo "invalid input"
+            ERROR
             ;;
     esac
 
     if [ $NIGHTLY != 1 ]; then echo "Finding latest stable version..."; Iversion=$(git describe --abbrev=0); echo "Starting Git checkout to "$Iversion"..."; git checkout -f -q $Iversion; fi # Git checkout if NIGHTLY !=1
     echo "Preparing Done."
+    printf "\n\n\n"
+)
 
- )
+read -e -i "$VAR_PREFIX" -p "PREFIX (Install root directory): " input # Reads VAR_PREFIX
+VAR_PREFIX="${input:-$VAR_PREFIX}"
 
-    echo ""
-    echo ""
-    echo ""
+read -e -i "$VAR_PLUGINS" -p "PLUGINS (Plugin directory): " input # Reads VAR_PLUGINS
+VAR_PLUGINS="${input:-$VAR_PLUGINS}"
 
-    read -e -i "$VAR_PREFIX" -p "PREFIX (Install root directory): " input # Reads VAR_PREFIX
-    VAR_PREFIX="${input:-$VAR_PREFIX}"
+read -e -i "$VAR_DEFAULT_CFG" -p "Default config path: " input # Reads VAR_DEFAULT_CFG
+VAR_DEFAULT_CFG="${input:-$VAR_DEFAULT_CFG}"
 
-    read -e -i "$VAR_PLUGINS" -p "PLUGINS (Plugin directory): " input # Reads VAR_PLUGINS
-    VAR_PLUGINS="${input:-$VAR_PLUGINS}"
+read -e -i "$VAR_EXAMPLE_CFGS" -p "Example config directory: " input # Reads VAR_EXAMPLE_CFGS
+VAR_EXAMPLE_CFGS="${input:-$VAR_EXAMPLE_CFGS}"
 
-    read -e -i "$VAR_DEFAULT_CFG" -p "Default config path: " input # Reads VAR_DEFAULT_CFG
-    VAR_DEFAULT_CFG="${input:-$VAR_DEFAULT_CFG}"
+UPDATER_SAVE
 
-    read -e -i "$VAR_EXAMPLE_CFGS" -p "Example config directory: " input # Reads VAR_EXAMPLE_CFGS
-    VAR_EXAMPLE_CFGS="${input:-$VAR_EXAMPLE_CFGS}"
-
-    UPDATER_SAVE
-
-    export PREFIX=$VAR_PREFIX
-    export PLUGINS=$VAR_PLUGINS
-    export DEFAULT_CFG=$VAR_DEFAULT_CFG
-    export DESTDIR=$VAR_DESTDIR
-    export EXAMPLES=$VAR_EXAMPLE_CFGS
+export PREFIX=$VAR_PREFIX
+export PLUGINS=$VAR_PLUGINS
+export DEFAULT_CFG=$VAR_DEFAULT_CFG
+export DESTDIR=$VAR_DESTDIR
+export EXAMPLES=$VAR_EXAMPLE_CFGS
 }
 
 UPDATER-PREP () {
+
+VAR_DESTDIR=""                  # Unused
+VAR_PREFIX=""
+VAR_PLUGINS=""
+VAR_DEFAULT_CFG=""
+VAR_EXAMPLE_CFGS=""
+
 (#### Subshell make things like cd $tmp_path easier to revert
 
 
@@ -103,7 +106,7 @@ UPDATER-PREP () {
     cd $tmp_path
     git init $tmp_path
     echo ""
-    
+
     read -p "Do you want to install the nightly version? (y/n)?" magic      #Asks for nightly version
     case "$magic" in 
     y|Y )   echo "OK! You´re a risky person ;D"
@@ -112,43 +115,39 @@ UPDATER-PREP () {
     n|N )   echo "That´s ok I´ll install the latest stable version ;-)"
             NIGHTLY=0
             ;;
-      * )   echo "invalid"
-            echo "ABORTING"
+      * )   echo "invalid input"
+            ERROR
             ;;
     esac
 
     if [ $NIGHTLY != 1 ]; then echo "Finding latest stable version..."; Iversion=$(git describe --abbrev=0); echo "Starting Git checkout to "$Iversion"..."; git checkout -f -q $Iversion; fi # Git checkout if NIGHTLY !=1
     echo "Done."
+    printf "\n\n\n"
+)
 
- )
+if [ -f $updater_file ]; then . $updater_file; else echo "Failed to load updater config from $updater_file"     # Checks if updater config file exist and import it(overwrite default values!)
 
-    echo ""
-    echo ""
-    echo ""
+rm -f "$VAR_PREFIX/bin/midimonster"
+rm -rf "$VAR_PLUGINS/"
 
-    if [ -sf $updater_file ]; then . $updater_file; else echo "Failed to load updater config from $updater_file"     # Checks if updater config file exist and import it(overwrite default values!)
-
-    rm -f $VAR_PREFIX/bin/midimonster
-    rm -rf $VAR_PLUGINS/*
-
-    export PREFIX=$VAR_PREFIX
-    export PLUGINS=$VAR_PLUGINS
-    export DEFAULT_CFG=$VAR_DEFAULT_CFG
-    export DESTDIR=$VAR_DESTDIR
-    export EXAMPLES=$VAR_EXAMPLE_CFGS
-    echo "Sucessfully imported Updater settings from $updater_file."
+export PREFIX=$VAR_PREFIX
+export PLUGINS=$VAR_PLUGINS
+export DEFAULT_CFG=$VAR_DEFAULT_CFG
+export DESTDIR=$VAR_DESTDIR
+export EXAMPLES=$VAR_EXAMPLE_CFGS
+echo "Sucessfully imported Updater settings from $updater_file."
 }
 
 UPDATER () {
     if [[ $installed_version !=~ $latest_version ]]; else echo "Newest Version is allready installed! ($installed_version)"; ERROR; fi     # PRÜFEN OB DAS FUNKTIONIERT MIT DER NIGHTLY VERSION INSTALLIERT! WELCHE VERSION KOMMT DA RAUS BEI midimonster --version??? passt das?
     UPDATER-PREP
     INSTALL-RUN
-    
+
     echo "Updating updater/installer script in $updater_dir"
     wget "https://raw.githubusercontent.com/cbdevnet/midimonster/master/installer.sh" -O $updater_dir
     chmod +x $updater_dir/installer.sh
     DONE
-}
+    }
 
 INSTALL-RUN () {                                    # Build
     cd "$tmp_path"
