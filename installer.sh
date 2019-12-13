@@ -129,6 +129,9 @@ UPDATER-PREP () {
 
     if [ -sf $updater_file ]; then . $updater_file; else echo "Failed to load updater config from $updater_file"     # Checks if updater config file exist and import it(overwrite default values!)
 
+    rm -f $VAR_PREFIX/bin/midimonster
+    rm -rf $VAR_PLUGINS/*
+
     export PREFIX=$VAR_PREFIX
     export PLUGINS=$VAR_PLUGINS
     export DEFAULT_CFG=$VAR_DEFAULT_CFG
