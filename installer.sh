@@ -9,7 +9,6 @@ updater_dir=/etc/midimonster-updater-installer       # Updater download + config
 updater_file=$updater_path/updater.conf                   # 
 
 latest_version=$(curl --silent "https://api.github.com/repos/cbdevnet/midimonster/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-installed_version=$(midimonster --version)
 
 makeargs=all                    # Build args
 
@@ -197,7 +196,7 @@ if [ $user != "root" ]; then echo "Installer must be run as root"; ERROR; fi    
 
 if [ $(wget -q --spider http://github.com) $? -eq 0 ]; else echo You need connection to the internet; ERROR ; fi
 
-if [ -e /usr/bin/midimonster ]; else echo "Midimonster binary not found skipping updater."; then UPDATER; fi    # Check if binary /usr/bin/midimonster exist. If yes start updater
+if [ -e /usr/bin/midimonster ]; else echo "Midimonster binary not found skipping updater."; then installed_version=$(midimonster --version); UPDATER; fi    # Check if binary /usr/bin/midimonster exist. If yes start updater
 
 INSTALL-DEPS
 INSTALL-PREP
