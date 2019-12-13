@@ -82,6 +82,13 @@ INSTALL-RUN () {                                    # Build
     make install
 }
 
+get_latest_release() { # Get newest Version tag from remote repo
+  curl --silent "https://api.github.com/repos/cbdevnet/midimonster/releases/latest" | # Get latest release from GitHub api
+    grep '"tag_name":' |                                            # Get tag line
+    sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
+}
+
+
 ERROR () {
     echo "Aborting..."
     CLEAN
