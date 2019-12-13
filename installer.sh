@@ -4,7 +4,6 @@
 deps=(libasound2-dev libevdev-dev liblua5.3-dev libjack-jackd2-dev pkg-config libssl-dev gcc make wget git)
 user=$(whoami)                  # for bypassing user check replace "$(whoami)" with "root".
 
-script_path="`cd $0; pwd`"      # Script dir
 tmp_path=$(mktemp -d)           # Repo download path
 updater_dir=/etc/midimonster-updater-installer       # Updater download + config path
 updater_file=$updater_path/updater.conf                   # 
