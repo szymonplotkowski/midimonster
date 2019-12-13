@@ -138,14 +138,14 @@ UPDATER-PREP () {
     echo "Sucessfully imported Updater settings from $updater_file."
 }
 
-UPDATER_START () {
+UPDATER () {
     if [[ $installed_version !=~ $latest_version ]]; else echo "Newest Version is allready installed! ($installed_version)"; ERROR; fi     # PRÜFEN OB DAS FUNKTIONIERT MIT DER NIGHTLY VERSION INSTALLIERT! WELCHE VERSION KOMMT DA RAUS BEI midimonster --version??? passt das?
     UPDATER-PREP
     INSTALL-RUN
     
     echo "Updating updater/installer script in $updater_dir"
-    wget "https://raw.githubusercontent.com/cbdevnet/midimonster/master/installer.sh" -O $updater_file
-    
+    wget "https://raw.githubusercontent.com/cbdevnet/midimonster/master/installer.sh" -O $updater_dir
+    chmod +x $updater_dir/installer.sh
     DONE
 }
 
@@ -195,7 +195,7 @@ if [ $user != "root" ]; then echo "Installer must be run as root"; ERROR; fi    
 
 if [ $(wget -q --spider http://github.com) $? -eq 0 ]; else echo You need connection to the internet; ERROR ; fi
 
-if [ -e /usr/bin/midimonster ]; else echo "Midimonster binary not found skipping updater."; then UPDATER_START; fi    # Check if binary /usr/bin/midimonster exist. If yes start updater
+if [ -e /usr/bin/midimonster ]; else echo "Midimonster binary not found skipping updater."; then UPDATER; fi    # Check if binary /usr/bin/midimonster exist. If yes start updater
 
 INSTALL-DEPS
 INSTALL-PREP
