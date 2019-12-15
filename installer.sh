@@ -89,11 +89,11 @@ export EXAMPLES=$VAR_EXAMPLE_CFGS
 
 UPDATER-PREP () {
 
-VAR_DESTDIR=""                  # Unused
-VAR_PREFIX=""
-VAR_PLUGINS=""
-VAR_DEFAULT_CFG=""
-VAR_EXAMPLE_CFGS=""
+VAR_DESTDIR=                  # Unused
+VAR_PREFIX=
+VAR_PLUGINS=
+VAR_DEFAULT_CFG=
+VAR_EXAMPLE_CFGS=
 
 (#### Subshell make things like cd $tmp_path easier to revert
 
@@ -123,9 +123,9 @@ VAR_EXAMPLE_CFGS=""
     if [ $NIGHTLY != 1 ]; then echo "Finding latest stable version..."; Iversion=$(git describe --abbrev=0); echo "Starting Git checkout to "$Iversion"..."; git checkout -f -q $Iversion; fi # Git checkout if NIGHTLY !=1
     echo "Done."
     printf "\n\n\n"
-)
+ )
 
-if [ -f $updater_file ]; then . $updater_file; else echo "Failed to load updater config from $updater_file"     # Checks if updater config file exist and import it(overwrite default values!)
+if [ -f $updater_file ]; then . $updater_file; else echo Failed to load updater config from $updater_file; ERROR; fi     # Checks if updater config file exist and import it(overwrite default values!)
 
 rm -f "$VAR_PREFIX/bin/midimonster"
 rm -rf "$VAR_PLUGINS/"
@@ -135,11 +135,14 @@ export PLUGINS=$VAR_PLUGINS
 export DEFAULT_CFG=$VAR_DEFAULT_CFG
 export DESTDIR=$VAR_DESTDIR
 export EXAMPLES=$VAR_EXAMPLE_CFGS
+
 echo "Sucessfully imported Updater settings from $updater_file."
 }
 
 UPDATER () {
-    if [[ $installed_version !=~ $latest_version ]]; else echo "Newest Version is allready installed! ($installed_version)"; ERROR; fi     # PRÜFEN OB DAS FUNKTIONIERT MIT DER NIGHTLY VERSION INSTALLIERT! WELCHE VERSION KOMMT DA RAUS BEI midimonster --version??? passt das?
+    installed_version="$(midimonster --version)"
+    if [[ "*$latest_version*" == "$installed_version" ]]; then echo "Newest Version is allready installed! ($installed_version)"; ERROR; fi     # PRÜFEN OB DAS FUNKTIONIERT MIT DER NIGHTLY VERSION INSTALLIERT! WELCHE VERSION KOMMT DA RAUS BEI midimonster --version??? passt das?
+    TEST
     UPDATER-PREP
     INSTALL-RUN
 
@@ -184,6 +187,13 @@ CLEAN () {
     rm -rf $tmp_path
 }
 
+TEST () {
+    echo "Installed Version: $installed_version"
+    printf "\n\n"
+    echo "Remote version: $current_version"
+    exit 0
+}
+
 ############################################## FUNCTIONS ##############################################
 
 
@@ -191,11 +201,11 @@ CLEAN () {
 trap ERROR SIGINT SIGTERM SIGKILL
 clear
 
-if [ $user != "root" ]; then echo "Installer must be run as root"; ERROR; fi    # Check if $user = root!
+if [ "$user" != "root" ]; then echo "Installer must be run as root"; ERROR; fi    # Check if $user = root!
 
-if [ $(wget -q --spider http://github.com) $? -eq 0 ]; else echo You need connection to the internet; ERROR ; fi
+if [ $(wget -q --spider http://github.com) $? -eq 1 ]; then echo You need connection to the internet; ERROR; fi
 
-if [ -e /usr/bin/midimonster ]; else echo "Midimonster binary not found skipping updater."; then installed_version=$(midimonster --version); UPDATER; fi    # Check if binary /usr/bin/midimonster exist. If yes start updater
+if [ -x "/usr/bin/midimonster" ]; then UPDATER; else echo Midimonster binary not found skipping updater.; fi    # Check if binary /usr/bin/midimonster exist. If yes start updater
 
 INSTALL-DEPS
 INSTALL-PREP
